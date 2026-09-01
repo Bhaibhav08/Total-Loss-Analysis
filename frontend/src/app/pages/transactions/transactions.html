@@ -1,0 +1,90 @@
+<div class="data-page">
+  <section class="page-intro">
+    <div>
+      <div class="eyebrow">RETAIL DATA LOGS</div>
+      <h1>Transaction Records</h1>
+      <p>Point-of-sale transactions, returns, and refunds across the store network.</p>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="applyFilter()"
+        placeholder="Filter by transaction ID, store ID, product, or employee..."
+      />
+    </div>
+  </section>
+
+  <!-- Empty Period State -->
+  <div *ngIf="!hasDataForPeriod" class="state-card empty-period-card">
+    <div class="empty-icon">📁</div>
+    <h3>No Transaction Logs Archived for {{ selectedPeriod }}</h3>
+    <p>Transaction logs for {{ selectedPeriod }} are archived in cold storage.</p>
+    <button class="retry-button" (click)="selectActivePeriod()">View Active Period (August 2026) →</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="hasDataForPeriod && loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading transaction logs...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasDataForPeriod && error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Connection Error</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadTransactions()">Retry</button>
+  </div>
+
+  <div *ngIf="hasDataForPeriod && !loading && !error" class="table-container">
+    <div class="data-summary">
+      Showing <strong>{{ filteredTransactions.length }}</strong> of {{ transactions.length }} logged transactions
+    </div>
+
+    <div class="data-table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>TX ID</th>
+            <th>STORE</th>
+            <th>PRODUCT</th>
+            <th>TYPE</th>
+            <th>QTY</th>
+            <th>AMOUNT</th>
+            <th>EMPLOYEE</th>
+            <th>TIMESTAMP</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tx of filteredTransactions">
+            <td><strong>{{ tx.transaction_id }}</strong></td>
+            <td><a [routerLink]="['/investigations', tx.store_id]" class="store-link">{{ tx.store_id }}</a></td>
+            <td>{{ tx.product_id }}</td>
+            <td>
+              <span 
+                class="type-badge" 
+                [ngClass]="{
+                  'return': tx.transaction_type === 'RETURN',
+                  'refund': tx.transaction_type === 'REFUND',
+                  'sale': tx.transaction_type === 'SALE'
+                }">
+                {{ tx.transaction_type }}
+              </span>
+            </td>
+            <td>{{ tx.quantity }}</td>
+            <td><strong>{{ formatCurrency(tx.amount) }}</strong></td>
+            <td>{{ tx.employee_id }}</td>
+            <td class="muted-time">{{ tx.timestamp }}</td>
+            <td>
+              <a [routerLink]="['/investigations', tx.store_id]" class="action-link">Investigate Store →</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

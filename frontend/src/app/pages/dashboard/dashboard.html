@@ -1,0 +1,396 @@
+<div class="dashboard">
+
+  <!-- =========================================
+       PAGE INTRO
+  ========================================== -->
+
+  <section class="page-intro">
+
+    <div>
+      <div class="eyebrow">
+        NETWORK OVERVIEW
+      </div>
+
+      <h1>Total Loss Intelligence</h1>
+
+      <p>
+        Retail loss performance, risk signals and
+        operational anomalies across the network.
+      </p>
+    </div>
+
+    <div class="intro-meta">
+      <span class="meta-label">REPORTING PERIOD</span>
+      <span class="meta-value">{{ selectedPeriod }}</span>
+    </div>
+
+  </section>
+
+  <!-- Empty State for Historical/Archived Period -->
+  <div *ngIf="!hasDataForPeriod" class="state-card empty-period-card">
+    <div class="empty-icon">📁</div>
+    <h3>No Loss Anomalies for {{ selectedPeriod }}</h3>
+    <p>All network retail locations operated within baseline risk tolerances during {{ selectedPeriod }}. Historical audit logs for this period are archived.</p>
+    <button class="retry-button" (click)="selectActivePeriod()">View Active Period (August 2026) →</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="hasDataForPeriod && loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading network intelligence...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasDataForPeriod && error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Unable to Load Intelligence</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadDashboardData()">Retry</button>
+  </div>
+
+
+  <ng-container *ngIf="hasDataForPeriod && !loading && !error">
+    <!-- =========================================
+         KEY METRICS
+    ========================================== -->
+
+    <section class="metrics">
+
+      <div class="metric">
+
+        <div class="metric-label">
+          TOTAL LOSS
+        </div>
+
+        <div class="metric-value">
+          {{ formatCurrency(totalLoss) }}
+        </div>
+
+        <div class="metric-description">
+          Estimated network loss
+        </div>
+
+      </div>
+
+
+      <div class="metric">
+
+        <div class="metric-label">
+          RETURN RATE
+        </div>
+
+        <div class="metric-value">
+          {{ returnRate }}%
+        </div>
+
+        <div class="metric-description">
+          Network average
+        </div>
+
+      </div>
+
+
+      <div class="metric">
+
+        <div class="metric-label">
+          REFUND RATE
+        </div>
+
+        <div class="metric-value">
+         {{ refundRate }}%
+        </div>
+
+        <div class="metric-description">
+          Network average
+        </div>
+
+      </div>
+
+
+      <div class="metric">
+
+        <div class="metric-label">
+          INVENTORY SHRINKAGE
+        </div>
+
+        <div class="metric-value">
+           ₹{{ shrinkage | number }}
+        </div>
+
+        <div class="metric-description">
+          Recorded discrepancy
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================================
+         STORE RISK & LOSS COMPOSITION
+    ========================================== -->
+
+    <section class="analysis-grid">
+
+
+      <div class="panel store-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <div class="panel-eyebrow">
+              RISK MONITOR
+            </div>
+
+            <h2>Store risk</h2>
+          </div>
+
+          <button class="text-button" routerLink="/stores">
+            View all →
+          </button>
+
+        </div>
+
+
+        <div class="store-list">
+
+          <div 
+            *ngFor="let store of investigations.slice(0, 5)" 
+            class="store-row"
+            (click)="navigateToStore(store.store_id)"
+            style="cursor: pointer;">
+
+            <div class="store-identity">
+
+              <div class="store-code">
+                {{ store.store_id }}
+              </div>
+
+              <div>
+                <div class="store-name">
+                  {{ store.store_name }}
+                </div>
+
+                <div class="store-region">
+                  {{ store.region }}
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="store-loss">
+
+              <div class="loss-value">
+                {{ formatCurrency(store.total_loss) }}
+              </div>
+
+              <div class="loss-label">
+                potential loss
+              </div>
+
+            </div>
+
+
+            <div 
+              class="risk" 
+              [ngClass]="{
+                'critical': store.risk_level === 'CRITICAL',
+                'high': store.risk_level === 'HIGH',
+                'medium': store.risk_level === 'MEDIUM',
+                'low': store.risk_level === 'LOW'
+              }">
+              {{ store.risk_level }}
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =========================================
+           LOSS COMPOSITION
+      ========================================== -->
+
+      <div class="panel composition-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <div class="panel-eyebrow">
+              LOSS BREAKDOWN
+            </div>
+
+            <h2>Loss composition</h2>
+          </div>
+
+        </div>
+
+
+        <div class="composition">
+
+          <div class="composition-total">
+
+            <span class="composition-total-label">
+              NETWORK LOSS
+            </span>
+
+            <strong>
+              {{ formatCurrency(totalLoss) }}
+            </strong>
+
+          </div>
+
+
+          <div class="loss-bars">
+
+            <div class="loss-bar-item">
+
+              <div class="bar-label">
+
+                <span>Returns</span>
+
+                <strong>{{ formatCurrency(returnsLoss) }}</strong>
+
+              </div>
+
+              <div class="bar">
+                <div
+                  class="bar-fill returns"
+                  [style.width.%]="returnsPercentage">
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="loss-bar-item">
+
+              <div class="bar-label">
+
+                <span>Shrinkage</span>
+
+                <strong>{{ formatCurrency(shrinkageLoss) }}</strong>
+
+              </div>
+
+              <div class="bar">
+                <div
+                  class="bar-fill shrinkage"
+                  [style.width.%]="shrinkagePercentage">
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="loss-bar-item">
+
+              <div class="bar-label">
+
+                <span>Refunds</span>
+
+                <strong>{{ formatCurrency(refundsLoss) }}</strong>
+
+              </div>
+
+              <div class="bar">
+                <div
+                  class="bar-fill refunds"
+                  [style.width.%]="refundsPercentage">
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="composition-note">
+
+            <span class="note-marker"></span>
+
+            Returns currently represent the largest
+            identified loss driver across the network.
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================================
+         ANOMALIES
+    ========================================== -->
+
+    <section class="panel anomalies-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <div class="panel-eyebrow">
+            INVESTIGATION QUEUE
+          </div>
+
+          <h2>Detected anomalies</h2>
+
+        </div>
+
+        <button class="text-button" routerLink="/investigations">
+          Open investigations →
+        </button>
+
+      </div>
+
+
+      <div class="anomaly-table">
+
+        <div class="anomaly-header">
+
+          <span>SEVERITY</span>
+          <span>STORE</span>
+          <span>OBSERVATION</span>
+          <span>ACTION</span>
+
+        </div>
+
+
+        <div *ngFor="let item of investigations" class="anomaly-row">
+
+          <span 
+            class="risk" 
+            [ngClass]="{
+              'critical': item.risk_level === 'CRITICAL',
+              'high': item.risk_level === 'HIGH',
+              'medium': item.risk_level === 'MEDIUM',
+              'low': item.risk_level === 'LOW'
+            }">
+            {{ item.risk_level }}
+          </span>
+
+          <strong>
+            {{ item.store_id }}
+          </strong>
+
+          <span class="observation">
+            {{ item.reasons[0] || 'Unusual operational loss pattern requiring review.' }}
+          </span>
+
+          <button class="investigate-button" (click)="navigateToStore(item.store_id)">
+            Investigate
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+  </ng-container>
+
+</div>

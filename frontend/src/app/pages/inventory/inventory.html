@@ -1,0 +1,80 @@
+<div class="data-page">
+  <section class="page-intro">
+    <div>
+      <div class="eyebrow">PHYSICAL DISCREPANCY AUDIT</div>
+      <h1>Inventory Records</h1>
+      <p>Stock levels, recorded discrepancies, and inventory shrinkage data across all stores.</p>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="applyFilter()"
+        placeholder="Filter by store ID, product ID or product name..."
+      />
+    </div>
+  </section>
+
+  <!-- Empty Period State -->
+  <div *ngIf="!hasDataForPeriod" class="state-card empty-period-card">
+    <div class="empty-icon">📁</div>
+    <h3>No Inventory Audit Records for {{ selectedPeriod }}</h3>
+    <p>All store physical inventory audits for {{ selectedPeriod }} matched system records with zero shrinkage variance.</p>
+    <button class="retry-button" (click)="selectActivePeriod()">View Active Period (August 2026) →</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="hasDataForPeriod && loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading inventory discrepancy records...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasDataForPeriod && error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Connection Error</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadInventory()">Retry</button>
+  </div>
+
+  <div *ngIf="hasDataForPeriod && !loading && !error" class="table-container">
+    <div class="data-summary">
+      Showing <strong>{{ filteredItems.length }}</strong> of {{ inventoryItems.length }} inventory audit records
+    </div>
+
+    <div class="data-table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>STORE</th>
+            <th>PRODUCT ID</th>
+            <th>SYSTEM QTY</th>
+            <th>PHYSICAL QTY</th>
+            <th>DISCREPANCY QTY</th>
+            <th>DISCREPANCY VALUE</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredItems">
+            <td><a [routerLink]="['/investigations', item.store_id]" class="store-link"><strong>{{ item.store_id }}</strong></a></td>
+            <td>{{ item.product_id }}</td>
+            <td>{{ item.system_quantity || item.expected_quantity }}</td>
+            <td>{{ item.physical_quantity || item.actual_quantity }}</td>
+            <td>
+              <span class="discrepancy-tag" [ngClass]="item.discrepancy_quantity != 0 ? 'high' : 'normal'">
+                {{ item.discrepancy_quantity }} units
+              </span>
+            </td>
+            <td><strong class="val-loss">{{ formatCurrency(item.discrepancy_value) }}</strong></td>
+            <td>
+              <a [routerLink]="['/investigations', item.store_id]" class="action-link">Investigate Store →</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

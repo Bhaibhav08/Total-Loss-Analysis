@@ -1,0 +1,88 @@
+<div class="investigations-page">
+  <section class="page-intro">
+    <div>
+      <div class="eyebrow">RISK SIGNAL QUEUE</div>
+      <h1>Active Store Investigations</h1>
+      <p>Prioritized retail locations flagged for operational loss analysis, inventory discrepancies, and pattern anomalies.</p>
+    </div>
+  </section>
+
+  <!-- Empty Period State -->
+  <div *ngIf="!hasDataForPeriod" class="state-card empty-period-card">
+    <div class="empty-icon">📁</div>
+    <h3>No Open Investigations for {{ selectedPeriod }}</h3>
+    <p>No stores exceeded risk anomaly thresholds during {{ selectedPeriod }}. All investigation cases for this period are resolved or archived.</p>
+    <button class="retry-button" (click)="selectActivePeriod()">View Active Period (August 2026) →</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="hasDataForPeriod && loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading investigation queue...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasDataForPeriod && error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Connection Error</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadInvestigations()">Retry</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="hasDataForPeriod && !loading && !error" class="queue-container">
+    <!-- Empty state -->
+    <div *ngIf="investigations.length === 0" class="state-card empty-state">
+      <p>No active store investigations flagged at this time.</p>
+    </div>
+
+    <div *ngIf="investigations.length > 0" class="queue-table-card">
+      <div class="table-header">
+        <span class="col-risk">RISK LEVEL</span>
+        <span class="col-store">STORE</span>
+        <span class="col-loss">ESTIMATED LOSS</span>
+        <span class="col-reasons">PRIMARY RISK REASONS</span>
+        <span class="col-action">ACTION</span>
+      </div>
+
+      <div class="table-body">
+        <div *ngFor="let item of investigations" class="table-row">
+          <div class="col-risk">
+            <span 
+              class="risk-badge" 
+              [ngClass]="{
+                'critical': item.risk_level === 'CRITICAL',
+                'high': item.risk_level === 'HIGH',
+                'medium': item.risk_level === 'MEDIUM',
+                'low': item.risk_level === 'LOW'
+              }">
+              {{ item.risk_level }}
+            </span>
+          </div>
+
+          <div class="col-store">
+            <strong class="store-id">{{ item.store_id }}</strong>
+            <span class="store-name">{{ item.store_name }}</span>
+            <span class="store-region">{{ item.region }} Region</span>
+          </div>
+
+          <div class="col-loss">
+            <strong class="loss-amount">{{ formatCurrency(item.total_loss) }}</strong>
+          </div>
+
+          <div class="col-reasons">
+            <ul class="reason-list">
+              <li *ngFor="let reason of item.reasons">{{ reason }}</li>
+            </ul>
+          </div>
+
+          <div class="col-action">
+            <a [routerLink]="['/investigations', item.store_id]" class="investigate-btn">
+              Investigate →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

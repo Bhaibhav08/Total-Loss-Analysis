@@ -1,0 +1,121 @@
+<aside class="sidebar">
+
+  <!-- Brand -->
+  <div class="brand">
+    <div class="brand-mark">
+      TL
+    </div>
+
+    <div class="brand-text">
+      <div class="brand-name">TOTAL LOSS</div>
+      <div class="brand-subtitle">INTELLIGENCE</div>
+    </div>
+  </div>
+
+
+  <!-- Main Navigation -->
+  <nav class="navigation">
+
+    <div class="nav-section">
+      <div class="section-label">MAIN</div>
+
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">◉</span>
+        <span>Overview</span>
+      </a>
+
+      <a routerLink="/stores" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">◇</span>
+        <span>Stores</span>
+      </a>
+
+      <a routerLink="/investigations" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">◇</span>
+        <span>Investigations</span>
+      </a>
+    </div>
+
+
+    <!-- Data -->
+    <div class="nav-section">
+
+      <div class="section-label">DATA</div>
+
+      <a routerLink="/transactions" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">◇</span>
+        <span>Transactions</span>
+      </a>
+
+      <a routerLink="/inventory" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">◇</span>
+        <span>Inventory</span>
+      </a>
+
+      <a routerLink="/products" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">◇</span>
+        <span>Products</span>
+      </a>
+
+    </div>
+
+
+    <!-- Intelligence -->
+    <div class="nav-section">
+
+      <div class="section-label">INTELLIGENCE</div>
+
+      <a routerLink="/ai-analysis" routerLinkActive="active" class="nav-item ai-item">
+        <span class="nav-icon">✦</span>
+        <span>AI Analysis</span>
+      </a>
+
+    </div>
+
+  </nav>
+
+
+  <!-- Bottom Area -->
+  <div class="sidebar-bottom">
+
+    <div class="system-status">
+      <span class="status-dot"></span>
+
+      <div>
+        <div class="status-title">System operational</div>
+        <div class="status-subtitle">All services available</div>
+      </div>
+    </div>
+
+
+    <div class="user-profile-wrapper">
+      <div 
+        *ngIf="showUserMenu" 
+        class="sidebar-popover-backdrop" 
+        (click)="closeUserMenu()">
+      </div>
+
+      <div class="user-profile" (click)="toggleUserMenu($event)" style="cursor: pointer;">
+
+        <div class="avatar">
+          {{ currentUser?.initials || 'BR' }}
+        </div>
+
+        <div class="user-info">
+          <div class="user-name">{{ currentUser?.name || 'Bhaibhav Raj' }}</div>
+          <div class="user-role">Loss Prevention Analyst</div>
+        </div>
+
+        <div class="user-menu">•••</div>
+
+      </div>
+
+      <div *ngIf="showUserMenu" class="sidebar-user-popover">
+        <div class="popover-user-name">{{ currentUser?.name || 'Bhaibhav Raj' }}</div>
+        <div class="popover-user-email">{{ currentUser?.email }}</div>
+        <button class="popover-logout-btn" (click)="logout()">Sign Out</button>
+      </div>
+    </div>
+
+  </div>
+
+</aside>

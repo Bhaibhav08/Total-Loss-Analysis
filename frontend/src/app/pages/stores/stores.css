@@ -1,0 +1,248 @@
+.stores-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #176b63;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.page-intro h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #171918;
+  margin: 0 0 6px 0;
+}
+
+.page-intro p {
+  font-size: 13px;
+  color: #686b67;
+  margin: 0;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #deddd7;
+  border-radius: 6px;
+  padding: 8px 14px;
+  min-width: 320px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #171918;
+  width: 100%;
+  background: transparent;
+}
+
+.search-icon {
+  font-size: 14px;
+  color: #92958f;
+}
+
+.directory-summary {
+  font-size: 12px;
+  color: #686b67;
+  margin-bottom: 16px;
+}
+
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.store-card {
+  background: #ffffff;
+  border: 1px solid #deddd7;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.store-card:hover {
+  border-color: #176b63;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.store-id-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #686b67;
+  background: #f0eee8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.store-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #171918;
+  margin: 0 0 2px 0;
+}
+
+.store-region-text {
+  font-size: 11px;
+  color: #92958f;
+}
+
+.risk-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.risk-badge.critical {
+  background: #fbeae9;
+  color: #9e2a2b;
+  border: 1px solid #f5c2c0;
+}
+
+.risk-badge.high {
+  background: #fdf3e7;
+  color: #b05c10;
+  border: 1px solid #f9d8b3;
+}
+
+.risk-badge.medium {
+  background: #fff8e6;
+  color: #8c6d1f;
+  border: 1px solid #f7e6b5;
+}
+
+.risk-badge.low {
+  background: #eef7f2;
+  color: #1b633e;
+  border: 1px solid #c4e8d3;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #f0eee8;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.metric-row .label {
+  color: #686b67;
+}
+
+.metric-row .value {
+  font-weight: 550;
+  color: #171918;
+}
+
+.metric-row .value.loss {
+  font-weight: 700;
+  color: #9e2a2b;
+}
+
+.card-footer {
+  padding-top: 12px;
+  border-top: 1px solid #f0eee8;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.investigate-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #176b63;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.investigate-link:hover {
+  color: #0e443f;
+  text-decoration: underline;
+}
+
+/* State cards */
+.state-card {
+  background: #ffffff;
+  border: 1px solid #deddd7;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #686b67;
+}
+
+.loading-state .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #deddd7;
+  border-top-color: #176b63;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state .error-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.error-state h3 {
+  margin: 0 0 8px 0;
+  color: #9e2a2b;
+}
+
+.retry-button {
+  background: #176b63;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+.retry-button:hover {
+  background: #0e443f;
+}

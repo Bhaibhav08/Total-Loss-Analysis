@@ -1,0 +1,198 @@
+<div class="store-details-page">
+  <div class="navigation-back">
+    <a routerLink="/investigations" class="back-link">← Back to Investigation Queue</a>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading store investigation details for {{ storeId }}...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Store Investigation Not Found</h3>
+    <p>{{ error }}</p>
+    <a routerLink="/investigations" class="retry-button">Return to Queue</a>
+  </div>
+
+  <div *ngIf="!loading && investigation" class="details-container">
+    <!-- Store Header Banner -->
+    <section class="store-header-panel">
+      <div class="header-main">
+        <div class="store-identity">
+          <span class="store-code-pill">{{ investigation.store_id }}</span>
+          <h1>{{ investigation.store_name }}</h1>
+          <span class="region-text">{{ investigation.region }} Region</span>
+        </div>
+
+        <div class="header-risk-block">
+          <div class="risk-meta">
+            <span class="meta-label">RISK LEVEL</span>
+            <span 
+              class="risk-badge" 
+              [ngClass]="{
+                'critical': investigation.risk_level === 'CRITICAL',
+                'high': investigation.risk_level === 'HIGH',
+                'medium': investigation.risk_level === 'MEDIUM',
+                'low': investigation.risk_level === 'LOW'
+              }">
+              {{ investigation.risk_level }}
+            </span>
+          </div>
+
+          <div class="risk-score">
+            <span class="score-label">RISK SCORE</span>
+            <span class="score-value">{{ investigation.risk_score }}/100</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="ai-analysis-btn" (click)="runAIAnalysis()">
+          <span class="spark-icon">✦</span> RUN AI ANALYSIS (AAVA)
+        </button>
+      </div>
+    </section>
+
+    <!-- Key Metrics Grid -->
+    <section class="metrics-grid">
+      <div class="metric-card loss-card">
+        <div class="card-label">POTENTIAL TOTAL LOSS</div>
+        <div class="card-value red">{{ formatCurrency(investigation.total_loss) }}</div>
+        <div class="card-subtext">Estimated aggregate loss</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="card-label">STORE RETURN RATE</div>
+        <div class="card-value">{{ investigation.metrics.return_rate }}%</div>
+        <div class="card-subtext" *ngIf="baseline">
+          Network avg: {{ baseline.average_return_rate }}%
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="card-label">STORE REFUND RATE</div>
+        <div class="card-value">{{ investigation.metrics.refund_rate }}%</div>
+        <div class="card-subtext" *ngIf="baseline">
+          Network avg: {{ baseline.average_refund_rate }}%
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="card-label">INVENTORY DISCREPANCY</div>
+        <div class="card-value">{{ investigation.metrics.discrepancy_quantity }} units</div>
+        <div class="card-subtext">Value: {{ formatCurrency(investigation.loss_breakdown.shrinkage) }}</div>
+      </div>
+    </section>
+
+    <!-- Two-column analysis layout -->
+    <div class="analysis-layout">
+      <!-- Left Column: Loss Drivers & Reasons -->
+      <div class="panel loss-drivers-panel">
+        <div class="panel-header">
+          <div class="panel-eyebrow">DETERMINISTIC ANALYSIS</div>
+          <h2>Flagged Risk Evidence</h2>
+        </div>
+
+        <div class="reasons-box">
+          <ul class="reasons-list">
+            <li *ngFor="let reason of investigation.reasons">
+              <span class="bullet">▶</span>
+              <span class="reason-text">{{ reason }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="loss-breakdown-details">
+          <div class="breakdown-title">Loss Category Distribution</div>
+
+          <div class="breakdown-item">
+            <div class="item-label">
+              <span>Returns Loss</span>
+              <strong>{{ formatCurrency(investigation.loss_breakdown.returns) }}</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="fill returns" [style.width.%]="(investigation.loss_breakdown.returns / (investigation.total_loss || 1)) * 100"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-item">
+            <div class="item-label">
+              <span>Inventory Shrinkage</span>
+              <strong>{{ formatCurrency(investigation.loss_breakdown.shrinkage) }}</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="fill shrinkage" [style.width.%]="(investigation.loss_breakdown.shrinkage / (investigation.total_loss || 1)) * 100"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-item">
+            <div class="item-label">
+              <span>Refunds Loss</span>
+              <strong>{{ formatCurrency(investigation.loss_breakdown.refunds) }}</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="fill refunds" [style.width.%]="(investigation.loss_breakdown.refunds / (investigation.total_loss || 1)) * 100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Network Comparison -->
+      <div class="panel comparison-panel">
+        <div class="panel-header">
+          <div class="panel-eyebrow">BENCHMARK COMPARISON</div>
+          <h2>Store vs Network Baseline</h2>
+        </div>
+
+        <div class="comparison-list" *ngIf="baseline">
+          <div class="comparison-row">
+            <div class="comp-metric">Return Rate</div>
+            <div class="comp-bar-container">
+              <div class="store-stat">Store: <strong>{{ investigation.metrics.return_rate }}%</strong></div>
+              <div class="network-stat">Network Avg: <span>{{ baseline.average_return_rate }}%</span></div>
+              <span 
+                class="variance-tag" 
+                [ngClass]="investigation.metrics.return_rate > baseline.average_return_rate ? 'above' : 'normal'">
+                {{ (investigation.metrics.return_rate - baseline.average_return_rate).toFixed(1) }}% variance
+              </span>
+            </div>
+          </div>
+
+          <div class="comparison-row">
+            <div class="comp-metric">Refund Rate</div>
+            <div class="comp-bar-container">
+              <div class="store-stat">Store: <strong>{{ investigation.metrics.refund_rate }}%</strong></div>
+              <div class="network-stat">Network Avg: <span>{{ baseline.average_refund_rate }}%</span></div>
+              <span 
+                class="variance-tag" 
+                [ngClass]="investigation.metrics.refund_rate > baseline.average_refund_rate ? 'above' : 'normal'">
+                {{ (investigation.metrics.refund_rate - baseline.average_refund_rate).toFixed(1) }}% variance
+              </span>
+            </div>
+          </div>
+
+          <div class="comparison-row">
+            <div class="comp-metric">Shrinkage Value</div>
+            <div class="comp-bar-container">
+              <div class="store-stat">Store: <strong>{{ formatCurrency(investigation.loss_breakdown.shrinkage) }}</strong></div>
+              <div class="network-stat">Network Avg: <span>{{ formatCurrency(baseline.average_shrinkage) }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-trigger-banner">
+          <div class="banner-text">
+            <h3>Need Deep Pattern Analysis?</h3>
+            <p>Deploy AAVA Total Loss Analyst agent to synthesize employee patterns, product concentration, and actionable recommendations.</p>
+          </div>
+          <button class="ai-analysis-btn" (click)="runAIAnalysis()">
+            <span class="spark-icon">✦</span> Run AAVA Analysis
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

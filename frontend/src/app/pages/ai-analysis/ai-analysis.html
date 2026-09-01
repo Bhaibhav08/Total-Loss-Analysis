@@ -1,0 +1,186 @@
+<div class="ai-analysis-page">
+
+  <!-- =========================================
+       PAGE INTRO
+  ========================================== -->
+  <section class="page-intro">
+    <div>
+      <div class="eyebrow">AAVA WORKFLOW ENGINE</div>
+      <h1>Live AI Investigation Brief</h1>
+      <p>AI agentic reasoning over physical inventory reconciliation, shrinkage metrics, and transaction anomalies.</p>
+    </div>
+
+    <!-- Mode Selector Tabs -->
+    <div class="source-mode-switcher">
+      <button 
+        class="mode-tab" 
+        [class.active]="activeTab === 'store'" 
+        (click)="setTab('store')">
+        🏢 Store Database
+      </button>
+      <button 
+        class="mode-tab" 
+        [class.active]="activeTab === 'upload'" 
+        (click)="setTab('upload')">
+        📁 Upload Audit CSV
+      </button>
+    </div>
+  </section>
+
+  <!-- =========================================
+       CONFIGURATION CONTROLS
+  ========================================== -->
+  <section class="control-panel">
+    
+    <!-- Store Database Mode -->
+    <div *ngIf="activeTab === 'store'" class="store-mode-box">
+      <div class="field-group">
+        <label for="storeSelect">Target Store Location:</label>
+        <select id="storeSelect" [(ngModel)]="storeId" (change)="onStoreChange()" [disabled]="loading">
+          <option *ngFor="let s of storesList" [value]="s.store_id">
+            {{ s.store_id }} — {{ s.store_name }} ({{ s.risk_level }})
+          </option>
+        </select>
+      </div>
+
+      <button class="primary-run-btn" (click)="runAnalysis()" [disabled]="loading">
+        <span class="sparkle-icon">✦</span>
+        <span>Run AAVA Agent</span>
+      </button>
+    </div>
+
+    <!-- Custom CSV Upload Mode -->
+    <div *ngIf="activeTab === 'upload'" class="upload-mode-box">
+      <div 
+        class="dropzone" 
+        (drop)="onFileDrop($event)" 
+        (dragover)="onDragOver($event)"
+        (click)="fileInput.click()">
+        
+        <input #fileInput type="file" accept=".csv,text/csv" (change)="onFileSelected($event)" style="display: none;" />
+        
+        <div class="drop-content" *ngIf="!uploadedFileName">
+          <div class="upload-icon">📄</div>
+          <strong>Drag & drop a CSV file here, or click to browse</strong>
+          <span class="hint">Upload inventory audits, transaction logs, or shrinkage records</span>
+        </div>
+
+        <div class="drop-content active-file" *ngIf="uploadedFileName">
+          <div class="file-badge">✓ {{ uploadedFileName }}</div>
+          <span class="file-stats">{{ uploadedRowCount }} data rows loaded • Ready for AAVA workflow</span>
+          <button class="change-file-btn" (click)="$event.stopPropagation(); fileInput.click()">Replace File</button>
+        </div>
+      </div>
+
+      <div class="upload-actions">
+        <button class="primary-run-btn" (click)="runAnalysis()" [disabled]="loading || !uploadedCsvContent">
+          <span class="sparkle-icon">✦</span>
+          <span>Execute AAVA Workflow</span>
+        </button>
+      </div>
+
+      <!-- Preview of uploaded CSV -->
+      <div class="csv-preview-card" *ngIf="csvPreviewLines.length > 0">
+        <div class="preview-header">
+          <span>CSV PAYLOAD PREVIEW (FIRST {{ csvPreviewLines.length }} LINES)</span>
+          <span class="badge">{{ uploadedRowCount }} ROWS</span>
+        </div>
+        <pre class="preview-code"><code>{{ csvPreviewLines.join('\n') }}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       LOADING & PROGRESS STEPPER
+  ========================================== -->
+  <div *ngIf="loading" class="state-card loading-state">
+    <div class="stepper-header">
+      <div class="spinner"></div>
+      <div>
+        <h3>Executing AAVA Workflow (Pipeline 21773)...</h3>
+        <p>Converting CSV text payload & dispatching task to Anthropic Claude Sonnet 4.5 agent.</p>
+      </div>
+    </div>
+
+    <div class="stepper-progress">
+      <div class="step-item" [class.done]="currentStep >= 1" [class.active]="currentStep === 1">
+        <div class="step-bullet">1</div>
+        <span>Formatting CSV Payload</span>
+      </div>
+      <div class="step-divider" [class.done]="currentStep >= 2"></div>
+      <div class="step-item" [class.done]="currentStep >= 2" [class.active]="currentStep === 2">
+        <div class="step-bullet">2</div>
+        <span>Submitting to AAVA API</span>
+      </div>
+      <div class="step-divider" [class.done]="currentStep >= 3"></div>
+      <div class="step-item" [class.done]="currentStep >= 3" [class.active]="currentStep === 3">
+        <div class="step-bullet">3</div>
+        <span>Agent Reasoning (Bedrock)</span>
+      </div>
+      <div class="step-divider" [class.done]="currentStep >= 4"></div>
+      <div class="step-item" [class.done]="currentStep >= 4" [class.active]="currentStep === 4">
+        <div class="step-bullet">4</div>
+        <span>Rendering Report</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       ERROR STATE
+  ========================================== -->
+  <div *ngIf="error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>AAVA Workflow Notice</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="runAnalysis()">Retry Execution</button>
+  </div>
+
+  <!-- =========================================
+       RENDERED MARKDOWN INVESTIGATION BRIEF
+  ========================================== -->
+  <div *ngIf="!loading && workflowResult && renderedHtml" class="report-wrapper">
+    
+    <!-- Meta Header Banner -->
+    <div class="report-meta-bar">
+      <div class="agent-identity">
+        <span class="live-pulse"></span>
+        <div>
+          <div class="agent-name">{{ workflowResult.model }}</div>
+          <div class="execution-tag" *ngIf="workflowResult.workflowExecutionId">
+            Execution ID: <code>{{ workflowResult.workflowExecutionId }}</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-actions">
+        <span *ngIf="workflowResult.is_mock" class="fallback-pill">Fallback Mode</span>
+        <span *ngIf="!workflowResult.is_mock" class="live-pill">Live Agent Verified</span>
+
+        <button class="action-btn" (click)="copyMarkdown()">
+          <span>📋</span> Copy Markdown
+        </button>
+        <button class="action-btn" (click)="printBrief()">
+          <span>🖨️</span> Print / Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast message for copy -->
+    <div class="toast-popup" *ngIf="copiedToast">
+      ✓ Markdown copied to clipboard!
+    </div>
+
+    <!-- Rendered Markdown Body -->
+    <div class="markdown-article">
+      <div class="brief-prose" [innerHTML]="renderedHtml"></div>
+    </div>
+
+    <!-- Back to Store Link -->
+    <div class="report-footer" *ngIf="activeTab === 'store'">
+      <a [routerLink]="['/investigations', storeId]" class="back-link">
+        ← Return to Store Investigation (${{ storeId }})
+      </a>
+    </div>
+  </div>
+
+</div>

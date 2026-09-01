@@ -1,0 +1,71 @@
+<!-- Fullscreen Login View -->
+<div *ngIf="isLoginPage || !isAuthenticated" class="fullscreen-login">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Main App Shell -->
+<div *ngIf="!isLoginPage && isAuthenticated" class="app-shell">
+
+  <app-sidebar></app-sidebar>
+
+  <div class="app-main">
+
+    <!-- Backdrop overlay to close period dropdown on click outside -->
+    <div 
+      *ngIf="showPeriodDropdown" 
+      class="popover-backdrop" 
+      (click)="closeAllPopovers()">
+    </div>
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+        <div class="breadcrumb">
+          <span class="breadcrumb-muted">{{ breadcrumbMain }}</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current">{{ breadcrumbSub }}</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+
+        <!-- System Status -->
+        <div class="system-status" title="API Status: Connected (Response 12ms)">
+          <span class="status-dot"></span>
+          <span>Live • Data Refreshed</span>
+        </div>
+
+        <!-- Period Selector -->
+        <div class="period-container">
+          <div class="period" (click)="togglePeriodDropdown($event)">
+            {{ selectedPeriod }}
+            <span class="period-arrow">⌄</span>
+          </div>
+
+          <div *ngIf="showPeriodDropdown" class="period-dropdown">
+            <div 
+              *ngFor="let p of periods" 
+              class="period-option"
+              [class.selected]="p === selectedPeriod"
+              (click)="selectPeriod(p)">
+              {{ p }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </header>
+
+    <!-- Toast Notification -->
+    <div *ngIf="toastMessage" class="toast-banner">
+      ✓ {{ toastMessage }}
+    </div>
+
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

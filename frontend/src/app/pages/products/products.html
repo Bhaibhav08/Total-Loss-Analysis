@@ -1,0 +1,60 @@
+<div class="data-page">
+  <section class="page-intro">
+    <div>
+      <div class="eyebrow">RETAIL SKU CATALOG</div>
+      <h1>Product Catalog</h1>
+      <p>Product categories, unit prices, and high-risk SKU monitoring across retail inventory.</p>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="applyFilter()"
+        placeholder="Filter by product ID, name, or category..."
+      />
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading product catalog...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Connection Error</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadProducts()">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error" class="table-container">
+    <div class="data-summary">
+      Showing <strong>{{ filteredProducts.length }}</strong> of {{ products.length }} catalog SKUs
+    </div>
+
+    <div class="data-table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>PRODUCT ID</th>
+            <th>PRODUCT NAME</th>
+            <th>CATEGORY</th>
+            <th>UNIT PRICE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredProducts">
+            <td><strong>{{ p.product_id }}</strong></td>
+            <td>{{ p.product_name }}</td>
+            <td><span class="category-pill">{{ p.category }}</span></td>
+            <td><strong>{{ formatCurrency(p.unit_price || p.price) }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

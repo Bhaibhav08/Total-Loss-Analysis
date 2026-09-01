@@ -1,0 +1,100 @@
+<div class="stores-page">
+  <section class="page-intro">
+    <div>
+      <div class="eyebrow">RETAIL NETWORK DIRECTORY</div>
+      <h1>Store Risk Directory</h1>
+      <p>Store performance, loss risk indicators, and active risk monitoring across all locations.</p>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="applyFilter()"
+        placeholder="Filter by store ID, location, region or risk level..."
+      />
+    </div>
+  </section>
+
+  <!-- Empty Period State -->
+  <div *ngIf="!hasDataForPeriod" class="state-card empty-period-card">
+    <div class="empty-icon">📁</div>
+    <h3>No Risk Anomalies for {{ selectedPeriod }}</h3>
+    <p>All 12 monitored stores operated within baseline loss tolerances during {{ selectedPeriod }}.</p>
+    <button class="retry-button" (click)="selectActivePeriod()">View Active Period (August 2026) →</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="hasDataForPeriod && loading" class="state-card loading-state">
+    <div class="spinner"></div>
+    <p>Loading store risk intelligence...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="hasDataForPeriod && error && !loading" class="state-card error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Connection Error</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadStores()">Retry</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="hasDataForPeriod && !loading && !error" class="stores-content">
+    <div class="directory-summary">
+      <span>Showing <strong>{{ filteredStores.length }}</strong> of {{ stores.length }} monitored stores</span>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredStores.length === 0" class="state-card empty-state">
+      <p>No stores match your search criteria.</p>
+    </div>
+
+    <div *ngIf="filteredStores.length > 0" class="stores-grid">
+      <div *ngFor="let store of filteredStores" class="store-card">
+        <div class="card-header">
+          <div>
+            <div class="store-id-badge">{{ store.store_id }}</div>
+            <h3 class="store-title">{{ store.store_name }}</h3>
+            <span class="store-region-text">{{ store.region }} Region</span>
+          </div>
+          <span 
+            class="risk-badge" 
+            [ngClass]="{
+              'critical': store.risk_level === 'CRITICAL',
+              'high': store.risk_level === 'HIGH',
+              'medium': store.risk_level === 'MEDIUM',
+              'low': store.risk_level === 'LOW'
+            }">
+            {{ store.risk_level }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="metric-row">
+            <span class="label">Potential Loss:</span>
+            <strong class="value loss">{{ formatCurrency(store.total_loss) }}</strong>
+          </div>
+          <div class="metric-row">
+            <span class="label">Return Rate:</span>
+            <span class="value">{{ store.metrics.return_rate }}%</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Refund Rate:</span>
+            <span class="value">{{ store.metrics.refund_rate }}%</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Inventory Discrepancy:</span>
+            <span class="value">{{ store.metrics.discrepancy_quantity }} units</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <a [routerLink]="['/investigations', store.store_id]" class="investigate-link">
+            Investigate Store →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
